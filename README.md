@@ -32,7 +32,8 @@
 
 - **[2026-07]** 🎉 Code released — inference/evaluation + full two-stage training pipeline.
 - **[2026-07]** 📄 Paper accepted to **ECCV 2026**.
-- **[coming soon]** 📦 SynthSync dataset & trained checkpoint — [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard) *(private for now; to be released on the HF Hub)*. Until then, run on your [own dataset](#-use-your-own-dataset).
+- **[2026-07]** 🤗 Trained checkpoint on the HF Hub: [qianyijie/avsync-evaluator](https://huggingface.co/qianyijie/avsync-evaluator) *(private for now)*.
+- **[coming soon]** 📦 SynthSync dataset — [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard) *(private; to be released on the HF Hub)*. Until then, run on your [own dataset](#-use-your-own-dataset).
 
 ## ✨ Introduction
 
@@ -68,7 +69,9 @@ New state of the art on SynthSync, over off-the-shelf Omni-LLMs, non-LLM metrics
 ```bash
 pip install -r requirements.txt
 
-# Convert the trained DeepSpeed checkpoint to a single .pt (once)
+# Get the trained weights: download from the HF Hub ...
+hf download qianyijie/avsync-evaluator avsync_eval_weights.pt --local-dir .
+# ... or convert your own DeepSpeed checkpoint to a single .pt (once)
 python convert_checkpoint.py --ckpt_dir /path/to/best-epoch081.ckpt --out ./avsync_eval_weights.pt
 
 # Score one clip
@@ -239,8 +242,8 @@ evaluate identically through `evaluate.py`.
 - [x] Inference / evaluation package
 - [x] Full training pipeline (preference SFT + R-GRPO)
 - [x] Batch scorers for unlabeled outputs
+- [x] **Trained checkpoint** — [🤗 qianyijie/avsync-evaluator](https://huggingface.co/qianyijie/avsync-evaluator) *(private for now)*
 - [ ] **SynthSync dataset** — [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard) *(private; releasing on the HF Hub)*
-- [ ] **Trained checkpoint** on the HF Hub *(in preparation)*
 - [ ] **SyncBench** prompts & samples
 
 ## 📝 Citation
