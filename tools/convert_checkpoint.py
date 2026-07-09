@@ -17,7 +17,7 @@ the LightningModule state_dict. Since training kept a reference model
 `transformer.` and `regression_head.` weights actually used at inference.
 
 Usage:
-    python convert_checkpoint.py \
+    python tools/convert_checkpoint.py \
         --ckpt_dir /path/to/best-epoch081-acc0.7323.ckpt \
         --out      ./avsync_eval_weights.pt
 """

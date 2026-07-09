@@ -7,7 +7,7 @@ the generation models against each other. Clips without an audio track are
 skipped and reported.
 
 Example:
-    python score_videogen.py \
+    python tools/score_videogen.py \
         --weights ./avsync_eval_weights.pt \
         --root /cpfs01/qyj_workspace/jcwang/Move2AMDCluster/VideoGen/outputs \
         --out ./videogen_scores.json
@@ -22,7 +22,10 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# This script lives in tools/; the project root is one level up.
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, _ROOT)
+sys.path.insert(0, os.path.join(_ROOT, "avsync_eval"))
 
 from avsync_eval.models.evaluator import AVSyncEvaluator
 from demo_single_video import load_clip

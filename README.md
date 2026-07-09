@@ -79,12 +79,12 @@ python demo_single_video.py --weights ./avsync_eval_weights.pt --video /path/to/
 ```
 
 > Trained your own model? Convert its DeepSpeed checkpoint to a single `.pt` once:
-> `python convert_checkpoint.py --ckpt_dir /path/to/your.ckpt --out ./avsync_eval_weights.pt`
+> `python tools/convert_checkpoint.py --ckpt_dir /path/to/your.ckpt --out ./avsync_eval_weights.pt`
 
 `transformers==4.57.1`, `qwen-omni-utils==0.0.8`; base weights download from the HF
 Hub on first run. For training: `pip install -r requirements_train.txt`.
 
-`convert_checkpoint.py` keeps only the `transformer.*` / `regression_head.*` tensors
+`tools/convert_checkpoint.py` keeps only the `transformer.*` / `regression_head.*` tensors
 from the ZeRO dir — `zero_to_fp32.py` is not needed.
 
 ## 🧠 Method
@@ -141,10 +141,10 @@ writes predictions to `eval_results.json`.
 
 ```bash
 # Flat directory of clips: per-clip scores + per-model mean/median
-python score_videogen.py --weights ./avsync_eval_weights.pt --root /path/to/outputs --out ./scores.json
+python tools/score_videogen.py --weights ./avsync_eval_weights.pt --root /path/to/outputs --out ./scores.json
 
 # LTX nested layout ( <sample_id>/video_*.mp4 )
-python score_ltx.py --weights ./avsync_eval_weights.pt --root /path/to/LTX --out ./ltx_scores.json
+python tools/score_ltx.py --weights ./avsync_eval_weights.pt --root /path/to/LTX --out ./ltx_scores.json
 ```
 
 ### Programmatic use
@@ -216,13 +216,14 @@ Audio is read from the video track. Evaluation-only needs just `overall_scores.j
 
 ```text
 opensource_eval/
-├── convert_checkpoint.py       # DeepSpeed ZeRO ckpt -> single .pt
 ├── evaluate.py                 # dataset eval -> pairwise accuracy
 ├── demo_single_video.py        # score one mp4
-├── score_videogen.py           # batch-score a flat dir (no GT)
-├── score_ltx.py                # batch-score LTX nested layout (no GT)
 ├── train.py                    # training entry (SFT / RL / RL_rank)
 ├── requirements*.txt           # inference / + training deps
+├── tools/
+│   ├── convert_checkpoint.py   # DeepSpeed ZeRO ckpt -> single .pt
+│   ├── score_videogen.py       # batch-score a flat dir (no GT)
+│   └── score_ltx.py            # batch-score LTX nested layout (no GT)
 └── avsync_eval/
     ├── models/                 # evaluator.py, hacked_qwen.py
     ├── data/dataset.py         # AV_ValDataset
