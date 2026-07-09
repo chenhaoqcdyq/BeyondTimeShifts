@@ -11,6 +11,8 @@
   <a href="#-method"><b>🧠 Method</b></a> |
   <a href="#-evaluation"><b>📊 Evaluation</b></a> |
   <a href="#-training"><b>🔧 Training</b></a> |
+  <a href="#-use-your-own-dataset"><b>📁 Custom Data</b></a> |
+  <a href="#-roadmap"><b>🧭 Roadmap</b></a> |
   <a href="#-citation"><b>📝 Citation</b></a>
 </p>
 
@@ -33,6 +35,7 @@
 
 - **[2026-07]** 🎉 Full open-source release — inference/evaluation package and the complete two-stage training pipeline (preference SFT + R-GRPO).
 - **[2026-07]** 📄 Our paper is accepted to **ECCV 2026**.
+- **[coming soon]** 📦 The **SynthSync** dataset and trained checkpoint are being prepared for release. Until then, everything runs on your [own dataset](#-use-your-own-dataset).
 
 ## ✨ Introduction
 
@@ -306,29 +309,88 @@ the best checkpoint by that metric is saved to `--exp_dir`.
 > **VRAM guide (RL_rank, batch_size=1):** ~4–5 methods @ 24 GB · ~6–8 @ 40 GB ·
 > 11 @ 80 GB.
 
-### Data layout
+### 📁 Use your own dataset
 
-The dataset files and videos are **not** bundled — point `--data_root` at your own
-copy following this layout:
+> **Note.** The **SynthSync** dataset (videos + human annotations) is not yet
+> released — see the [Roadmap](#-roadmap). In the meantime, the training and
+> evaluation code runs on **any custom dataset** that follows the simple layout
+> below. Each *sample* is one underlying video; each *method* is one audio source
+> (a V2A model, or `GT_A` for the real audio) that produced a clip for that video.
+
+**Directory layout** (`--data_root`):
 
 ```
-Crop_5s_resize/
-├── overall_scores.json                 # {sample: {method: gt_score}}
-├── valing_pairs.json                   # {sample: [[method1, method2, gap], ...]}
-├── train.txt                           # sample names, one per line (RL_rank)
-├── curriculumn_SFT/level_{0..9}.json   # curriculum pairs — SFT
-├── curriculumn_RL/level_{0..9}.json    # curriculum pairs — pairwise RL
-└── <method>/<sample_name>.mp4          # one 5 s clip per (method, sample)
+my_dataset/
+├── overall_scores.json                 # {sample: {method: gt_score}}      [required]
+├── valing_pairs.json                   # validation pairs                  [eval + val]
+├── train.txt                           # sample names, one per line        [RL_rank]
+├── curriculumn_SFT/level_{0..9}.json   # curriculum pairs — SFT            [SFT only]
+├── curriculumn_RL/level_{0..9}.json    # curriculum pairs — pairwise RL    [RL only]
+└── <method>/<sample_name>.mp4          # one clip per (method, sample)     [required]
 ```
 
-- **`overall_scores.json`** — ground-truth sync score per `(sample, method)`.
-- **`valing_pairs.json`** — method pairs to compare for accuracy; pairs with equal
-  GT scores are skipped. Used by both `evaluate.py` and training validation.
-- **`train.txt`** — sample list for `RL_rank` (only `overall_scores.json`,
-  `train.txt`, and the per-method mp4s are needed for this mode).
-- **`curriculumn_{SFT,RL}/level_{i}.json`** — each maps a sample to method pairs
-  of difficulty level *i* (level 0 = hardest / smallest GT gap). Needed for SFT /
-  pairwise RL only.
+Every `<method>/<sample_name>.mp4` is a clip with an audio track; the audio is
+read from the video, so no separate `.wav` is needed. Clips are auto padded/
+trimmed to 5 s (60 frames @ 12 FPS, `140×140`) and 80 000 audio samples.
+
+**File formats.**
+
+`overall_scores.json` — the single source of truth for ground-truth scores. Maps
+each sample to a `{method: score}` dict (higher = better synchronized). Scores can
+be any real numbers (win-rates, MOS, human ratings, …); only their *ordering* per
+sample is used.
+
+```json
+{
+  "clip0001": {"mmaudio": 0.42, "foley": 0.19, "GT_A": 1.0},
+  "clip0002": {"mmaudio": 0.16, "foley": 0.55, "GT_A": 1.0}
+}
+```
+
+`valing_pairs.json` — used by `evaluate.py` and training validation. Maps each
+sample to a list of method pairs to compare; a 3rd element (score gap) is optional
+and **ignored by the code** (scores are looked up from `overall_scores.json`).
+Pairs with equal GT scores are skipped.
+
+```json
+{
+  "clip0001": [["mmaudio", "foley"], ["mmaudio", "GT_A"]],
+  "clip0002": [["foley", "GT_A"]]
+}
+```
+
+`train.txt` — plain text, one sample name per line. Used only by `RL_rank`.
+
+```
+clip0001
+clip0002
+```
+
+`curriculumn_SFT/level_{i}.json` and `curriculumn_RL/level_{i}.json` — needed only
+for `SFT` / pairwise `RL`. Ten files per mode (`level_0.json` … `level_9.json`),
+where `level_0` is the hardest bucket (smallest score gap) and `level_9` the
+easiest. Each maps a sample to a list of method pairs; **only the first two
+elements (the two method names) are read** — any trailing values are ignored.
+
+```json
+{
+  "clip0001": [["mmaudio", "foley"], ["foley", "GT_A"]]
+}
+```
+
+> **Minimal setup by mode.** `RL_rank` needs only `overall_scores.json`,
+> `train.txt`, and the per-method mp4s (+ `valing_pairs.json` for validation). SFT
+> and pairwise RL additionally need the matching `curriculumn_*/level_*.json`
+> files. If you only want to **evaluate** an existing checkpoint, you need just
+> `overall_scores.json`, `valing_pairs.json`, and the mp4s.
+
+> **⚠️ Custom method names.** The listwise `AV_RLRankDataset` and the curriculum
+> `AV_Trainset` reference a fixed method list (`ALL_METHODS` in
+> `avsync_eval/training/train_dataset.py`: the 10 V2A models above, plus `GT_A`).
+> If your dataset uses different method names, edit `ALL_METHODS` to match — every
+> name there must appear both as a `<method>/` sub-directory and as a key in
+> `overall_scores.json`. Evaluation (`evaluate.py`) reads method names directly
+> from `valing_pairs.json`, so it works with any names without code changes.
 
 ## 📂 Repository Layout
 
@@ -367,6 +429,18 @@ opensource_eval/
   (80 000 samples) must match training — these are the defaults everywhere.
 - Training and inference share the same model, head, and forward, so a checkpoint
   trained with `train.py` evaluates identically through `evaluate.py`.
+
+## 🧭 Roadmap
+
+- [x] Inference / evaluation package
+- [x] Full training pipeline — preference SFT (dynamic curriculum) + R-GRPO
+- [x] Batch scorers for unlabeled generative-model outputs
+- [ ] **SynthSync dataset** — videos + pairwise human annotations *(in preparation)*
+- [ ] **Trained checkpoint** on the Hugging Face Hub *(in preparation)*
+- [ ] **SyncBench** prompts & generated samples
+
+Until the dataset is released, the code is fully usable on your
+[own dataset](#-use-your-own-dataset).
 
 ## 📝 Citation
 
