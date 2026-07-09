@@ -17,10 +17,11 @@
 </p>
 
 <p>
+  <a href="https://arxiv.org/abs/XXXX.XXXXX"><img src="https://img.shields.io/badge/arXiv-XXXX.XXXXX-b31b1b?style=flat-square&logo=arxiv&logoColor=white" alt="arXiv"></a>
+  <a href="https://huggingface.co/qianyijie/avsync-evaluator"><img src="https://img.shields.io/badge/🤗%20Model-avsync--evaluator-yellow?style=flat-square" alt="HF Model"></a>
+  <a href="https://huggingface.co/qianyijie/leaderboard"><img src="https://img.shields.io/badge/🤗%20Dataset-SynthSync-yellow?style=flat-square" alt="HF Dataset"></a>
   <img src="https://img.shields.io/badge/ECCV-2026-1f6feb?style=flat-square" alt="ECCV 2026">
   <img src="https://img.shields.io/badge/Backbone-Qwen2.5--Omni--3B-blue?style=flat-square" alt="Qwen2.5-Omni-3B">
-  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.10+">
-  <img src="https://img.shields.io/badge/PyTorch-2.1+-ee4c2c?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch 2.1+">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT">
 </p>
 
@@ -31,9 +32,9 @@
 ## 🔥 News
 
 - **[2026-07]** 🎉 Code released — inference/evaluation + full two-stage training pipeline.
-- **[2026-07]** 📄 Paper accepted to **ECCV 2026**.
-- **[2026-07]** 🤗 Trained checkpoint on the HF Hub: [qianyijie/avsync-evaluator](https://huggingface.co/qianyijie/avsync-evaluator) *(private for now)*.
-- **[coming soon]** 📦 SynthSync dataset — [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard) *(private; to be released on the HF Hub)*. Until then, run on your [own dataset](#-use-your-own-dataset).
+- **[2026-06]** 📄 Paper accepted to **ECCV 2026**.
+- **[2026-07]** 🤗 Trained checkpoint released: [qianyijie/avsync-evaluator](https://huggingface.co/qianyijie/avsync-evaluator).
+- **[2026-07]** 📦 SynthSync dataset released: [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard). You can also run on your [own dataset](#-use-your-own-dataset).
 
 ## ✨ Introduction
 
@@ -191,7 +192,7 @@ python train.py --train_mode RL_rank --data_root /path/to/data \
 
 ### 📁 Use your own dataset
 
-> **SynthSync isn't public yet** — coming to [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard) ([Roadmap](#-roadmap)). Meanwhile the code runs on **any custom dataset**.
+> Prefer our data? Grab **SynthSync** from [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard). Otherwise, the code runs on **any custom dataset** in the layout below.
 
 ```
 my_dataset/
@@ -242,8 +243,8 @@ evaluate identically through `evaluate.py`.
 - [x] Inference / evaluation package
 - [x] Full training pipeline (preference SFT + R-GRPO)
 - [x] Batch scorers for unlabeled outputs
-- [x] **Trained checkpoint** — [🤗 qianyijie/avsync-evaluator](https://huggingface.co/qianyijie/avsync-evaluator) *(private for now)*
-- [ ] **SynthSync dataset** — [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard) *(private; releasing on the HF Hub)*
+- [x] **Trained checkpoint** — [🤗 qianyijie/avsync-evaluator](https://huggingface.co/qianyijie/avsync-evaluator)
+- [x] **SynthSync dataset** — [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard)
 - [ ] **SyncBench** prompts & samples
 
 ## 📝 Citation
@@ -256,7 +257,9 @@ evaluate identically through `evaluate.py`.
                Feng, Yuxiang and Liu, Yang and Sun, Baigui and Liu, Yong and
                Wang, Shujun},
   booktitle = {European Conference on Computer Vision (ECCV)},
-  year      = {2026}
+  year      = {2026},
+  eprint    = {XXXX.XXXXX},
+  archivePrefix = {arXiv}
 }
 ```
 
