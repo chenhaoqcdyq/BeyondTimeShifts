@@ -1,8 +1,8 @@
 <div align="center">
 
-<h1>AV-Sync Evaluator</h1>
+<h1>Beyond Time Shifts</h1>
 
-<p><strong>🎬 Beyond Time Shifts: A Reference-Free Evaluator for Generative Audio-Visual Models</strong></p>
+<p><strong>🎬 Adapting Omni-LLM as a Reference-Free Evaluator for Generative Audio-Visual Models</strong></p>
 
 <p>A reference-free audio-visual synchronization metric on Qwen2.5-Omni-3B. One video clip in → one scalar out (higher = better synced). Official code for our ECCV 2026 paper, with the full training recipe and inference stack.</p>
 
@@ -70,15 +70,16 @@ New state of the art on SynthSync, over off-the-shelf Omni-LLMs, non-LLM metrics
 ```bash
 pip install -r requirements.txt
 
-# Get the trained weights: download from the HF Hub ...
+# Download the trained weights from the HF Hub
 hf download qianyijie/avsync-evaluator avsync_eval_weights.pt --local-dir .
-# ... or convert your own DeepSpeed checkpoint to a single .pt (once)
-python convert_checkpoint.py --ckpt_dir /path/to/best-epoch081.ckpt --out ./avsync_eval_weights.pt
 
 # Score one clip
 python demo_single_video.py --weights ./avsync_eval_weights.pt --video /path/to/clip.mp4
 # -> Sync score for /path/to/clip.mp4: 3.14
 ```
+
+> Trained your own model? Convert its DeepSpeed checkpoint to a single `.pt` once:
+> `python convert_checkpoint.py --ckpt_dir /path/to/your.ckpt --out ./avsync_eval_weights.pt`
 
 `transformers==4.57.1`, `qwen-omni-utils==0.0.8`; base weights download from the HF
 Hub on first run. For training: `pip install -r requirements_train.txt`.
