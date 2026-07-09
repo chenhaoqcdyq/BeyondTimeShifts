@@ -1,0 +1,9 @@
+# Training requirements for the AV-Sync evaluator.
+# Install the inference deps first (requirements.txt), then these.
+
+-r requirements.txt
+
+lightning>=2.2         # PyTorch Lightning (Trainer, LightningModule)
+deepspeed>=0.14        # ZeRO stage-2 strategy used for multi-GPU training
+scipy>=1.11            # kendalltau / spearmanr in the ranking reward
+tensorboard>=2.15      # training curves

@@ -1,0 +1,10 @@
+# Inference-only requirements for the AV-Sync evaluator.
+# (Lightning / tensorboard are NOT needed — this package does not use them.)
+
+torch>=2.1            # match your CUDA/ROCm build
+transformers==4.57.1  # Qwen2.5-Omni support; other 4.5x may work but is untested
+qwen-omni-utils==0.0.8
+numpy==1.26.4
+Pillow==10.4.0
+tqdm==4.66.5
+# av / decord / torchvision are pulled in by qwen-omni-utils for video decoding
