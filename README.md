@@ -32,9 +32,9 @@
 ## 🔥 News
 
 - **[2026-07]** 🎉 Code released — inference/evaluation + full two-stage training pipeline.
-- **[2026-06]** 📄 Paper accepted to **ECCV 2026**.
 - **[2026-07]** 🤗 Trained checkpoint released: [qianyijie/avsync-evaluator](https://huggingface.co/qianyijie/avsync-evaluator).
 - **[2026-07]** 📦 SynthSync dataset released: [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard). You can also run on your [own dataset](#-use-your-own-dataset).
+- **[2026-06]** 📄 Paper accepted to **ECCV 2026**.
 
 ## ✨ Introduction
 
