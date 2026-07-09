@@ -7,79 +7,120 @@
 <meta name="description" content="A reference-free audio-visual synchronization evaluator built on Qwen2.5-Omni-3B. ECCV 2026.">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-  .hero-title { font-weight: 800; letter-spacing: -0.02em; }
-  .subtitle-accent { color: #1f6feb; font-weight: 600; }
-  .section { padding: 3rem 1.5rem; }
-  .figure-caption { color: #555; font-size: 0.92rem; margin-top: 0.6rem; }
-  .link-button { margin: 0.25rem; }
-  .video-card { background: #fafafa; border: 1px solid #ededed; border-radius: 10px; padding: 0.75rem; text-align: center; }
-  .video-card video { border-radius: 6px; width: 100%; background: #000; }
-  .score-badge { display: inline-block; font-weight: 700; border-radius: 6px; padding: 0.15rem 0.6rem; color: #fff; margin-top: 0.5rem; }
-  .rank-1 { background: #1a9850; } .rank-mid { background: #f0a202; } .rank-low { background: #d73027; }
-  .highlight { background: #fff6d6; padding: 0.05em 0.3em; border-radius: 4px; }
-  .bibtex-box { background: #1e1e1e; color: #e6e6e6; border-radius: 8px; padding: 1.2rem; overflow-x: auto; font-size: 0.85rem; }
-  .contrib-icon { color: #1f6feb; margin-right: 0.4rem; }
-  .divider { border: none; border-top: 1px solid #eaeaea; max-width: 900px; margin: 0 auto; }
-  figure img { border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+  :root { --accent:#6ea8fe; --accent-strong:#3b82f6; }
+  body { font-family:'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+  /* ---------- HERO ---------- */
+  .hero-wrap {
+    position: relative;
+    background: radial-gradient(1200px 600px at 20% -10%, #1e3a8a 0%, transparent 55%),
+                radial-gradient(1000px 500px at 100% 0%, #5b21b6 0%, transparent 50%),
+                linear-gradient(160deg, #0b1120 0%, #111a33 45%, #0a0f1e 100%);
+    color: #fff;
+    overflow: hidden;
+  }
+  .hero-wrap::after {
+    content:""; position:absolute; inset:0;
+    background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 22px 22px; opacity:0.5; pointer-events:none;
+  }
+  .hero-inner { position:relative; z-index:2; padding: 4.5rem 1.5rem 4rem; max-width: 1000px; margin:0 auto; text-align:center; }
+  .venue-pill {
+    display:inline-block; border:1px solid rgba(255,255,255,0.35); border-radius:999px;
+    padding:0.3rem 1rem; font-size:0.8rem; letter-spacing:0.12em; font-weight:600;
+    text-transform:uppercase; color:#dbeafe; margin-bottom:1.5rem; backdrop-filter: blur(4px);
+  }
+  .hero-title {
+    font-weight:900; font-size: clamp(2.4rem, 6vw, 4.2rem); line-height:1.05;
+    letter-spacing:-0.03em; margin-bottom:0.6rem;
+    background: linear-gradient(180deg,#ffffff 0%, #c7d6ff 100%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .hero-sub { font-size: clamp(1.05rem,2.4vw,1.5rem); font-weight:600; color:#c7d2fe; margin-bottom:1.8rem; }
+  .hero-sub .accent { color:#93c5fd; }
+  .authors { color:#e5e7eb; font-size:1rem; line-height:1.9; }
+  .affil { color:#9aa7c7; font-size:0.85rem; margin-top:0.4rem; }
+  .hero-btns { margin-top:1.8rem; display:flex; flex-wrap:wrap; gap:0.6rem; justify-content:center; }
+  .hero-btns .button { border:none; font-weight:600; border-radius:999px; padding:1.1rem 1.5rem; transition: transform .15s ease, box-shadow .15s ease; }
+  .hero-btns .button:hover { transform: translateY(-2px); box-shadow:0 8px 22px rgba(0,0,0,0.35); }
+  .btn-arxiv { background:#e11d48; color:#fff; }
+  .btn-code { background:#1f2937; color:#fff; }
+  .btn-hf { background:#f5b301; color:#1a1a1a; }
+  .hero-fade { height:2.5rem; background:linear-gradient(180deg,#0a0f1e 0%, transparent 100%); }
+
+  /* ---------- SECTIONS ---------- */
+  .section { padding: 3.2rem 1.5rem; }
+  .figure-caption { color:#555; font-size:0.92rem; margin-top:0.6rem; }
+  figure img { border-radius:10px; box-shadow:0 2px 14px rgba(0,0,0,0.10); }
+  .divider { border:none; border-top:1px solid #ececec; max-width:900px; margin:0 auto; }
+  .highlight { background:#fff2c2; padding:0.05em 0.35em; border-radius:4px; }
+  .contrib-icon { color:var(--accent-strong); margin-right:0.4rem; }
+
+  /* ---------- VIDEO GRID ---------- */
+  .clip-tabs { display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:0.4rem; }
+  .clip-tab { cursor:pointer; border:1px solid #d5dbe8; background:#fff; color:#334; border-radius:999px;
+              padding:0.5rem 1.1rem; font-weight:600; font-size:0.9rem; transition: all .15s; }
+  .clip-tab.active { background:var(--accent-strong); color:#fff; border-color:var(--accent-strong); }
+  .clip-prompt { text-align:center; color:#667; font-size:0.9rem; margin:0.5rem auto 1.5rem; max-width:760px; }
+  .video-card { background:#fff; border:1px solid #e8ebf2; border-radius:12px; padding:0.7rem; text-align:center;
+                box-shadow:0 1px 6px rgba(0,0,0,0.05); transition: transform .15s, box-shadow .15s; }
+  .video-card:hover { transform: translateY(-3px); box-shadow:0 8px 22px rgba(0,0,0,0.10); }
+  .video-card video { border-radius:8px; width:100%; background:#000; display:block; }
+  .model-name { font-weight:700; margin-top:0.5rem; }
+  .score-badge { display:inline-block; font-weight:800; border-radius:999px; padding:0.2rem 0.85rem; color:#fff; margin-top:0.45rem; font-size:0.9rem; }
+  .rank-hi { background:#16a34a; } .rank-mid { background:#f59e0b; } .rank-lo { background:#dc2626; }
+  .clip-panel { display:none; } .clip-panel.active { display:block; }
+
+  .bibtex-box { background:#0f1117; color:#e6e6e6; border-radius:10px; padding:1.3rem; overflow-x:auto; font-size:0.85rem; line-height:1.5; }
 </style>
 </head>
 <body>
 
 <!-- ===================== HERO ===================== -->
-<section class="hero is-white">
-  <div class="hero-body">
-    <div class="container has-text-centered" style="max-width: 980px;">
-      <span class="tag is-info is-light is-medium" style="margin-bottom:1rem;">ECCV 2026</span>
-      <h1 class="title is-2 hero-title">Beyond Time Shifts</h1>
-      <h2 class="subtitle is-4" style="margin-top:0.5rem;">
-        Adapting Omni-LLM as a <span class="subtitle-accent">Reference-Free Evaluator</span><br>
-        for Generative Audio-Visual Models
-      </h2>
+<div class="hero-wrap">
+  <div class="hero-inner">
+    <span class="venue-pill">ECCV 2026</span>
+    <h1 class="hero-title">Beyond Time Shifts</h1>
+    <p class="hero-sub">Adapting Omni-LLM as a <span class="accent">Reference-Free Evaluator</span><br>for Generative Audio-Visual Models</p>
 
-      <p class="is-size-6" style="margin:1.2rem 0 0.3rem;">
-        Yijie Qian<sup>1,3</sup>&nbsp;&nbsp;
-        Juncheng Wang<sup>2</sup>&nbsp;&nbsp;
-        Chao Xu<sup>3,4</sup>&nbsp;&nbsp;
-        Huihan Wang<sup>2</sup>&nbsp;&nbsp;
-        Yuxiang Feng<sup>1</sup><br>
-        Yang Liu<sup>3,4</sup>&nbsp;&nbsp;
-        Baigui Sun<sup>3,4</sup>&nbsp;&nbsp;
-        Yong Liu<sup>1</sup>&nbsp;&nbsp;
-        Shujun Wang<sup>2</sup>
-      </p>
-      <p class="is-size-7 has-text-grey" style="margin-bottom:1.2rem;">
-        <sup>1</sup>Zhejiang University&nbsp;&nbsp;
-        <sup>2</sup>The Hong Kong Polytechnic University&nbsp;&nbsp;
-        <sup>3</sup>IROOTECH Technology&nbsp;&nbsp;
-        <sup>4</sup>Sany Group
-      </p>
+    <p class="authors">
+      Yijie Qian<sup>1,3</sup>&nbsp;&nbsp; Juncheng Wang<sup>2</sup>&nbsp;&nbsp; Chao Xu<sup>3,4</sup>&nbsp;&nbsp;
+      Huihan Wang<sup>2</sup>&nbsp;&nbsp; Yuxiang Feng<sup>1</sup><br>
+      Yang Liu<sup>3,4</sup>&nbsp;&nbsp; Baigui Sun<sup>3,4</sup>&nbsp;&nbsp; Yong Liu<sup>1</sup>&nbsp;&nbsp; Shujun Wang<sup>2</sup>
+    </p>
+    <p class="affil">
+      <sup>1</sup>Zhejiang University&nbsp;&nbsp; <sup>2</sup>The Hong Kong Polytechnic University&nbsp;&nbsp;
+      <sup>3</sup>IROOTECH Technology&nbsp;&nbsp; <sup>4</sup>Sany Group
+    </p>
 
-      <div class="buttons is-centered" style="margin-top:1rem;">
-        <a class="button is-dark is-rounded link-button" href="https://arxiv.org/abs/XXXX.XXXXX">
-          <span class="icon"><i class="fas fa-file-pdf"></i></span><span>arXiv</span>
-        </a>
-        <a class="button is-dark is-rounded link-button" href="https://github.com/chenhaoqcdyq/BeyondTimeShifts">
-          <span class="icon"><i class="fab fa-github"></i></span><span>Code</span>
-        </a>
-        <a class="button is-warning is-rounded link-button" href="https://huggingface.co/qianyijie/avsync-evaluator">
-          <span class="icon">🤗</span><span>Model</span>
-        </a>
-        <a class="button is-warning is-rounded link-button" href="https://huggingface.co/qianyijie/leaderboard">
-          <span class="icon">🤗</span><span>Dataset</span>
-        </a>
-      </div>
-
-      <figure style="margin-top:2rem;">
-        <img src="static/images/overview.png" alt="Overview: failure cases and pipeline">
-        <p class="figure-caption">
-          <b>Top:</b> generated audio-visual outputs break the "just a time shift" assumption with structural
-          hallucinations and asymmetric cross-modal relations. <b>Bottom:</b> our pipeline — the
-          <b>SynthSync</b> dataset, a reference-free continuous Omni-LLM scorer, and <b>R-GRPO</b> post-training.
-        </p>
-      </figure>
+    <div class="hero-btns">
+      <a class="button btn-arxiv" href="https://arxiv.org/abs/XXXX.XXXXX">
+        <span class="icon"><i class="fas fa-file-pdf"></i></span><span>arXiv</span></a>
+      <a class="button btn-code" href="https://github.com/chenhaoqcdyq/BeyondTimeShifts">
+        <span class="icon"><i class="fab fa-github"></i></span><span>Code</span></a>
+      <a class="button btn-hf" href="https://huggingface.co/qianyijie/avsync-evaluator">
+        <span class="icon">🤗</span><span>Model</span></a>
+      <a class="button btn-hf" href="https://huggingface.co/qianyijie/leaderboard">
+        <span class="icon">🤗</span><span>Dataset</span></a>
     </div>
+  </div>
+  <div class="hero-fade"></div>
+</div>
+
+<!-- ===================== TEASER ===================== -->
+<section class="section" style="padding-top:2.2rem;">
+  <div class="container has-text-centered" style="max-width:1000px;">
+    <figure>
+      <img src="static/images/overview.png" alt="Overview: failure cases and pipeline">
+      <p class="figure-caption">
+        <b>Top:</b> generated audio-visual outputs break the "just a time shift" assumption with structural
+        hallucinations and asymmetric cross-modal relations. <b>Bottom:</b> our pipeline — the
+        <b>SynthSync</b> dataset, a reference-free continuous Omni-LLM scorer, and <b>R-GRPO</b> post-training.
+      </p>
+    </figure>
   </div>
 </section>
 
@@ -87,39 +128,30 @@
 
 <!-- ===================== ABSTRACT ===================== -->
 <section class="section">
-  <div class="container" style="max-width: 820px;">
+  <div class="container" style="max-width:820px;">
     <h2 class="title is-3 has-text-centered">Abstract</h2>
-    <div class="content is-size-6" style="text-align: justify;">
+    <div class="content is-size-6" style="text-align:justify;">
       <p>
-        As audio-visual generative models evolve into world simulators, cross-modal synchronization
-        is a critical proxy for the consistency of world dynamics in generated content. Yet existing
-        metrics presume structural correctness, reducing synchronization to mere temporal alignment,
-        and thus fail on generative outputs with structural hallucinations and asymmetric cross-modal
-        relations. This creates a paradox: <i>human evaluators rely on relative, reference-dependent
-        comparisons, whereas automated metrics require reference-free, absolute scalars.</i>
-        We resolve this by distilling relative human perception into a continuous, globally consistent
-        metric. We introduce <b>SynthSync</b>, a dataset of generative failures ranked via pairwise
-        human annotations; adapt an <b>Omni-LLM with a continuous latent projection</b> to translate
-        relative rankings into absolute values; and propose <b>R-GRPO</b> (Real-Valued Group Relative
-        Policy Optimization) to internalize the global causal structure of synchronization via listwise
-        score distributions. Our metric achieves state-of-the-art human-preference alignment and powers
-        <b>SyncBench</b>, a standardized benchmark for AV-generation models.
+        As audio-visual generative models evolve into world simulators, cross-modal synchronization is a
+        critical proxy for the consistency of world dynamics in generated content. Yet existing metrics
+        presume structural correctness, reducing synchronization to mere temporal alignment, and thus fail
+        on generative outputs with structural hallucinations and asymmetric cross-modal relations. This
+        creates a paradox: <i>human evaluators rely on relative, reference-dependent comparisons, whereas
+        automated metrics require reference-free, absolute scalars.</i> We resolve this by distilling
+        relative human perception into a continuous, globally consistent metric. We introduce
+        <b>SynthSync</b>, a dataset of generative failures ranked via pairwise human annotations; adapt an
+        <b>Omni-LLM with a continuous latent projection</b> to translate relative rankings into absolute
+        values; and propose <b>R-GRPO</b> (Real-Valued Group Relative Policy Optimization) to internalize
+        the global causal structure of synchronization via listwise score distributions. Our metric
+        achieves state-of-the-art human-preference alignment and powers <b>SyncBench</b>, a standardized
+        benchmark for AV-generation models.
       </p>
     </div>
-
-    <div class="columns is-multiline" style="margin-top:1rem;">
-      <div class="column is-6">
-        <p><i class="fas fa-database contrib-icon"></i><b>SynthSync</b> — first dataset of authentic generative sync failures.</p>
-      </div>
-      <div class="column is-6">
-        <p><i class="fas fa-brain contrib-icon"></i><b>Continuous Omni-LLM</b> — reference-free causal scoring.</p>
-      </div>
-      <div class="column is-6">
-        <p><i class="fas fa-cogs contrib-icon"></i><b>R-GRPO</b> — listwise RL over continuous latent policies.</p>
-      </div>
-      <div class="column is-6">
-        <p><i class="fas fa-trophy contrib-icon"></i><b>SyncBench</b> — SOTA alignment + standardized benchmark.</p>
-      </div>
+    <div class="columns is-multiline" style="margin-top:0.5rem;">
+      <div class="column is-6"><p><i class="fas fa-database contrib-icon"></i><b>SynthSync</b> — first dataset of authentic generative sync failures.</p></div>
+      <div class="column is-6"><p><i class="fas fa-brain contrib-icon"></i><b>Continuous Omni-LLM</b> — reference-free causal scoring.</p></div>
+      <div class="column is-6"><p><i class="fas fa-cogs contrib-icon"></i><b>R-GRPO</b> — listwise RL over continuous latent policies.</p></div>
+      <div class="column is-6"><p><i class="fas fa-trophy contrib-icon"></i><b>SyncBench</b> — SOTA alignment + standardized benchmark.</p></div>
     </div>
   </div>
 </section>
@@ -127,56 +159,58 @@
 <hr class="divider">
 
 <!-- ===================== VIDEO COMPARISON ===================== -->
-<section class="section" style="background:#f7f9fc;">
-  <div class="container" style="max-width: 1080px;">
+<section class="section" style="background:#f6f8fc;">
+  <div class="container" style="max-width:1120px;">
     <h2 class="title is-3 has-text-centered">🎬 Scoring Generative Models</h2>
     <p class="subtitle is-6 has-text-centered has-text-grey">
-      Same prompt, five AV-generation models. Our reference-free score (higher = better synchronized)
-      ranks them in line with human perception.
-    </p>
-    <p class="has-text-centered is-size-7 has-text-grey-dark" style="margin-bottom:1.5rem;">
-      <i class="fas fa-quote-left"></i> A snow plow operating on a snowy road at night, pushing snow to the sides… <i class="fas fa-quote-right"></i>
-      &nbsp;(SyncBench&nbsp;#189)
+      Same prompt, six AV-generation models. Our reference-free score (higher = better synchronized)
+      ranks them in line with human perception. Unmute to hear the generated audio.
     </p>
 
-    <div class="columns is-multiline is-centered">
-      <div class="column is-4">
-        <div class="video-card">
-          <video controls muted loop playsinline poster=""><source src="static/videos/clip189_sora2.mp4" type="video/mp4"></video>
-          <p style="margin-top:0.4rem;"><b>Sora-2</b></p>
-          <span class="score-badge rank-1">Ours: +2.00</span>
-        </div>
-      </div>
-      <div class="column is-4">
-        <div class="video-card">
-          <video controls muted loop playsinline><source src="static/videos/clip189_veo3.mp4" type="video/mp4"></video>
-          <p style="margin-top:0.4rem;"><b>Veo-3.1</b></p>
-          <span class="score-badge rank-mid">Ours: &minus;3.42</span>
-        </div>
-      </div>
-      <div class="column is-4">
-        <div class="video-card">
-          <video controls muted loop playsinline><source src="static/videos/clip189_vidu.mp4" type="video/mp4"></video>
-          <p style="margin-top:0.4rem;"><b>Vidu-Q3</b></p>
-          <span class="score-badge rank-mid">Ours: &minus;6.59</span>
-        </div>
-      </div>
-      <div class="column is-4">
-        <div class="video-card">
-          <video controls muted loop playsinline><source src="static/videos/clip189_wan.mp4" type="video/mp4"></video>
-          <p style="margin-top:0.4rem;"><b>WAN-2.6</b></p>
-          <span class="score-badge rank-low">Ours: &minus;7.03</span>
-        </div>
-      </div>
-      <div class="column is-4">
-        <div class="video-card">
-          <video controls muted loop playsinline><source src="static/videos/clip189_grok.mp4" type="video/mp4"></video>
-          <p style="margin-top:0.4rem;"><b>Grok-3</b></p>
-          <span class="score-badge rank-low">Ours: &minus;13.50</span>
-        </div>
+    <div class="clip-tabs">
+      <span class="clip-tab active" data-clip="c004">Cleaning a mat</span>
+      <span class="clip-tab" data-clip="c029">Wood carving</span>
+      <span class="clip-tab" data-clip="c066">Striking wood</span>
+    </div>
+
+    <!-- CLIP 004 -->
+    <div class="clip-panel active" id="c004">
+      <p class="clip-prompt"><i class="fas fa-quote-left"></i> A soapy solution being sprayed onto a colorful mat during cleaning… <i class="fas fa-quote-right"></i> &nbsp;(SyncBench #004)</p>
+      <div class="columns is-multiline is-centered">
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/004_veo3.mp4" type="video/mp4"></video><p class="model-name">Veo-3.1</p><span class="score-badge rank-hi">Ours: +7.30</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/004_sora2.mp4" type="video/mp4"></video><p class="model-name">Sora-2</p><span class="score-badge rank-hi">Ours: +5.00</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/004_wan.mp4" type="video/mp4"></video><p class="model-name">WAN-2.6</p><span class="score-badge rank-mid">Ours: +1.75</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/004_ltx.mp4" type="video/mp4"></video><p class="model-name">LTX-2</p><span class="score-badge rank-mid">Ours: +0.56</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/004_grok.mp4" type="video/mp4"></video><p class="model-name">Grok-3</p><span class="score-badge rank-lo">Ours: &minus;0.06</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/004_vidu.mp4" type="video/mp4"></video><p class="model-name">Vidu-Q3</p><span class="score-badge rank-lo">Ours: &minus;0.94</span></div></div>
       </div>
     </div>
-    <p class="figure-caption has-text-centered">Unmute each clip to hear the generated audio. Scores are produced by our evaluator with no reference audio.</p>
+
+    <!-- CLIP 029 -->
+    <div class="clip-panel" id="c029">
+      <p class="clip-prompt"><i class="fas fa-quote-left"></i> A craftsman meticulously carving a piece of wood… <i class="fas fa-quote-right"></i> &nbsp;(SyncBench #029)</p>
+      <div class="columns is-multiline is-centered">
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/029_sora2.mp4" type="video/mp4"></video><p class="model-name">Sora-2</p><span class="score-badge rank-hi">Ours: +13.84</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/029_veo3.mp4" type="video/mp4"></video><p class="model-name">Veo-3.1</p><span class="score-badge rank-hi">Ours: +11.02</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/029_vidu.mp4" type="video/mp4"></video><p class="model-name">Vidu-Q3</p><span class="score-badge rank-hi">Ours: +9.07</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/029_wan.mp4" type="video/mp4"></video><p class="model-name">WAN-2.6</p><span class="score-badge rank-mid">Ours: +8.76</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/029_grok.mp4" type="video/mp4"></video><p class="model-name">Grok-3</p><span class="score-badge rank-mid">Ours: +4.19</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/029_ltx.mp4" type="video/mp4"></video><p class="model-name">LTX-2</p><span class="score-badge rank-mid">Ours: +4.16</span></div></div>
+      </div>
+    </div>
+
+    <!-- CLIP 066 -->
+    <div class="clip-panel" id="c066">
+      <p class="clip-prompt"><i class="fas fa-quote-left"></i> A close-up of a piece of wood being struck by a tool… <i class="fas fa-quote-right"></i> &nbsp;(SyncBench #066)</p>
+      <div class="columns is-multiline is-centered">
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/066_sora2.mp4" type="video/mp4"></video><p class="model-name">Sora-2</p><span class="score-badge rank-hi">Ours: +9.95</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/066_vidu.mp4" type="video/mp4"></video><p class="model-name">Vidu-Q3</p><span class="score-badge rank-hi">Ours: +4.56</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/066_veo3.mp4" type="video/mp4"></video><p class="model-name">Veo-3.1</p><span class="score-badge rank-mid">Ours: +3.66</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/066_wan.mp4" type="video/mp4"></video><p class="model-name">WAN-2.6</p><span class="score-badge rank-mid">Ours: +2.13</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/066_grok.mp4" type="video/mp4"></video><p class="model-name">Grok-3</p><span class="score-badge rank-mid">Ours: +1.25</span></div></div>
+        <div class="column is-4"><div class="video-card"><video controls muted loop playsinline><source src="static/videos/066_ltx.mp4" type="video/mp4"></video><p class="model-name">LTX-2</p><span class="score-badge rank-lo">Ours: &minus;0.25</span></div></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -184,39 +218,33 @@
 
 <!-- ===================== METHOD ===================== -->
 <section class="section">
-  <div class="container" style="max-width: 1000px;">
+  <div class="container" style="max-width:1000px;">
     <h2 class="title is-3 has-text-centered">Method</h2>
-    <figure>
-      <img src="static/images/framework.png" alt="Framework">
-    </figure>
-    <div class="content is-size-6" style="margin-top:1.5rem; text-align: justify;">
-      <p>
-        The evaluator is a <b>Qwen2.5-Omni-3B</b> backbone whose discrete language head is replaced by a
+    <figure><img src="static/images/framework.png" alt="Framework"></figure>
+    <div class="content is-size-6" style="margin-top:1.5rem; text-align:justify;">
+      <p>The evaluator is a <b>Qwen2.5-Omni-3B</b> backbone whose discrete language head is replaced by a
         continuous MLP that reads the hidden state at a <code>[SCORE]</code> token:
-        <code>s = MLP(h<sub>score</sub>)</code>. Training proceeds in two stages:
-      </p>
+        <code>s = MLP(h<sub>score</sub>)</code>. Training proceeds in two stages:</p>
       <ul>
-        <li><b>Stage I — Preference SFT.</b> A Bradley-Terry-Luce objective over pairwise preferences
-          induces a globally consistent, reference-free scale, with a dynamic curriculum that anneals
-          from easy (high-margin) to hard pairs.</li>
+        <li><b>Stage I — Preference SFT.</b> A Bradley-Terry-Luce objective over pairwise preferences induces
+          a globally consistent, reference-free scale, with a dynamic curriculum that anneals from easy
+          (high-margin) to hard pairs.</li>
         <li><b>Stage II — R-GRPO.</b> The scalar output <code>μ<sub>θ</sub></code> is reparameterized as a
           Gaussian policy; listwise rollouts per video are rewarded by how well their full ranking matches
           ground truth (NDCG / Kendall / Spearman / Top-1 / MRR / pairwise), with group-relative advantages,
           a closed-form Gaussian importance ratio, PPO clipping, and a KL penalty.</li>
       </ul>
     </div>
-    <figure style="margin-top:1rem;">
-      <img src="static/images/rl_curves.png" alt="R-GRPO validation curves">
-      <p class="figure-caption has-text-centered">Validation learning curves during R-GRPO post-training.</p>
-    </figure>
+    <figure style="margin-top:1rem;"><img src="static/images/rl_curves.png" alt="R-GRPO validation curves">
+      <p class="figure-caption has-text-centered">Validation learning curves during R-GRPO post-training.</p></figure>
   </div>
 </section>
 
 <hr class="divider">
 
 <!-- ===================== RESULTS ===================== -->
-<section class="section" style="background:#f7f9fc;">
-  <div class="container" style="max-width: 820px;">
+<section class="section" style="background:#f6f8fc;">
+  <div class="container" style="max-width:820px;">
     <h2 class="title is-3 has-text-centered">Results</h2>
     <p class="subtitle is-6 has-text-centered has-text-grey">State of the art on the SynthSync benchmark.</p>
     <div class="table-container">
@@ -241,38 +269,24 @@
 
 <!-- ===================== SYNCBENCH ===================== -->
 <section class="section">
-  <div class="container" style="max-width: 1000px;">
+  <div class="container" style="max-width:1000px;">
     <h2 class="title is-3 has-text-centered">SyncBench Leaderboard</h2>
-    <p class="subtitle is-6 has-text-centered has-text-grey">
-      Ranking six cutting-edge AV-generation models across 185 diverse prompts.
-    </p>
-    <figure>
-      <img src="static/images/syncbench.png" alt="SyncBench content distribution">
-      <p class="figure-caption has-text-centered">Content distribution: prompt word cloud (left) and category breakdown (right).</p>
-    </figure>
-    <figure style="margin-top:1.5rem;">
-      <img src="static/images/leaderboard.png" alt="SyncBench leaderboard">
-      <p class="figure-caption has-text-centered">
-        Our continuous metric (main chart) cleanly stratifies models; legacy evaluators (sub-charts)
-        produce volatile, contradictory rankings.
-      </p>
-    </figure>
+    <p class="subtitle is-6 has-text-centered has-text-grey">Ranking six cutting-edge AV-generation models across 185 diverse prompts.</p>
+    <figure><img src="static/images/syncbench.png" alt="SyncBench content distribution">
+      <p class="figure-caption has-text-centered">Content distribution: prompt word cloud (left) and category breakdown (right).</p></figure>
+    <figure style="margin-top:1.5rem;"><img src="static/images/leaderboard.png" alt="SyncBench leaderboard">
+      <p class="figure-caption has-text-centered">Our continuous metric (main chart) cleanly stratifies models; legacy evaluators (sub-charts) produce volatile, contradictory rankings.</p></figure>
   </div>
 </section>
 
 <hr class="divider">
 
 <!-- ===================== QUALITATIVE ===================== -->
-<section class="section" style="background:#f7f9fc;">
-  <div class="container" style="max-width: 1000px;">
+<section class="section" style="background:#f6f8fc;">
+  <div class="container" style="max-width:1000px;">
     <h2 class="title is-3 has-text-centered">Qualitative Examples</h2>
-    <figure>
-      <img src="static/images/qualitative_cases.png" alt="Qualitative examples">
-      <p class="figure-caption has-text-centered">
-        Our metric penalizes missing events, mistimed responses, timbre mismatch, and event-count errors —
-        not low-level signal similarity.
-      </p>
-    </figure>
+    <figure><img src="static/images/qualitative_cases.png" alt="Qualitative examples">
+      <p class="figure-caption has-text-centered">Our metric penalizes missing events, mistimed responses, timbre mismatch, and event-count errors — not low-level signal similarity.</p></figure>
   </div>
 </section>
 
@@ -280,7 +294,7 @@
 
 <!-- ===================== BIBTEX ===================== -->
 <section class="section">
-  <div class="container" style="max-width: 820px;">
+  <div class="container" style="max-width:820px;">
     <h2 class="title is-3 has-text-centered">BibTeX</h2>
     <pre class="bibtex-box">@inproceedings{qian2026beyond,
   title     = {Beyond Time Shifts: Adapting Omni-LLM as a Reference-Free
@@ -294,14 +308,26 @@
   </div>
 </section>
 
-<footer class="footer" style="padding: 2rem 1.5rem;">
+<footer class="footer" style="padding:2rem 1.5rem;">
   <div class="content has-text-centered is-size-7 has-text-grey">
-    <p>
-      Page template adapted from the <a href="https://nerfies.github.io/">Nerfies</a> project page (Bulma CSS).
-      Content released under the <a href="https://github.com/chenhaoqcdyq/BeyondTimeShifts/blob/main/LICENSE">MIT License</a>.
-    </p>
+    <p>Page template adapted from <a href="https://nerfies.github.io/">Nerfies</a> (Bulma CSS).
+      Content released under the <a href="https://github.com/chenhaoqcdyq/BeyondTimeShifts/blob/main/LICENSE">MIT License</a>.</p>
   </div>
 </footer>
+
+<script>
+  document.querySelectorAll('.clip-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('.clip-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.clip-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      var panel = document.getElementById(tab.dataset.clip);
+      panel.classList.add('active');
+      // pause videos in hidden panels
+      document.querySelectorAll('.clip-panel:not(.active) video').forEach(v=>v.pause());
+    });
+  });
+</script>
 
 </body>
 </html>
