@@ -1,7 +1,8 @@
 # Using Your Own Dataset
 
-The **SynthSync** dataset (videos + human annotations) is not yet released — see
-the [Roadmap](../README.md#-roadmap). In the meantime, all training and
+The **SynthSync** dataset (videos + human annotations) is not public yet — it will
+be released at [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard)
+(see the [Roadmap](../README.md#-roadmap)). In the meantime, all training and
 evaluation code runs on **any custom dataset** that follows the layout below.
 
 **Terminology.** Each *sample* is one underlying video. Each *method* is one audio

@@ -32,7 +32,7 @@
 
 - **[2026-07]** 🎉 Code released — inference/evaluation + full two-stage training pipeline.
 - **[2026-07]** 📄 Paper accepted to **ECCV 2026**.
-- **[coming soon]** 📦 SynthSync dataset & trained checkpoint. Until then, run on your [own dataset](#-use-your-own-dataset).
+- **[coming soon]** 📦 SynthSync dataset & trained checkpoint — [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard) *(private for now; to be released on the HF Hub)*. Until then, run on your [own dataset](#-use-your-own-dataset).
 
 ## ✨ Introduction
 
@@ -188,7 +188,7 @@ python train.py --train_mode RL_rank --data_root /path/to/data \
 
 ### 📁 Use your own dataset
 
-> **SynthSync isn't released yet** ([Roadmap](#-roadmap)) — but the code runs on **any custom dataset**.
+> **SynthSync isn't public yet** — coming to [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard) ([Roadmap](#-roadmap)). Meanwhile the code runs on **any custom dataset**.
 
 ```
 my_dataset/
@@ -239,7 +239,7 @@ evaluate identically through `evaluate.py`.
 - [x] Inference / evaluation package
 - [x] Full training pipeline (preference SFT + R-GRPO)
 - [x] Batch scorers for unlabeled outputs
-- [ ] **SynthSync dataset** *(in preparation)*
+- [ ] **SynthSync dataset** — [🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard) *(private; releasing on the HF Hub)*
 - [ ] **Trained checkpoint** on the HF Hub *(in preparation)*
 - [ ] **SyncBench** prompts & samples
 
