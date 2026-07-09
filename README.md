@@ -164,19 +164,24 @@ Training aligns this scalar to human preference topology in two stages:
 ### 🏆 SyncBench leaderboard
 
 We deploy the metric to rank six cutting-edge AV-generation models (Sora-2,
-Veo-3.1, WAN-2.6, Vidu-Q3, Grok-3, LTX-2) on 185 diverse prompts. Unlike legacy
-metrics (AV-Align, JavisScore, DeSync) — which show extreme variance and rankings
-that contradict human consensus — our metric cleanly stratifies model quality.
+Veo-3.1, WAN-2.6, Vidu-Q3, Grok-3, LTX-2) on **185 diverse prompts** spanning a
+wide range of physical events. Unlike legacy metrics (AV-Align, JavisScore,
+DeSync) — which show extreme variance and rankings that contradict human consensus
+— our metric cleanly stratifies model quality.
 
 <div align="center">
+<img src="assets/syncbench.png" width="95%" alt="SyncBench content distribution">
+<br><sub>SyncBench content distribution: prompt word cloud (left) and category breakdown across five core audio-visual domains (right).</sub>
+<br><br>
 <img src="assets/leaderboard.png" width="95%" alt="SyncBench leaderboard">
+<br><sub>Our continuous metric (main chart) cleanly ranks the six models; legacy evaluators (sub-charts) produce volatile, contradictory rankings.</sub>
 </div>
 
-### 🔍 Qualitative example
+### 🔍 Qualitative examples
 
 <div align="center">
-<img src="assets/qualitative_case.png" width="72%" alt="Qualitative SyncBench example">
-<br><sub>The metric penalizes missing acoustic events, premature/delayed responses, timbre mismatch, and event-count inconsistency — reflecting causal-semantic structure rather than low-level signal similarity.</sub>
+<img src="assets/qualitative_cases.png" width="95%" alt="Qualitative SyncBench examples">
+<br><sub>Four SyncBench cases (motorcycle engine, wood chop, soft placement, chimes). Our metric penalizes missing acoustic events, premature/delayed responses, timbre mismatch, and event-count inconsistency — reflecting causal-semantic structure rather than low-level signal similarity.</sub>
 </div>
 
 ## 📊 Evaluation
@@ -311,86 +316,29 @@ the best checkpoint by that metric is saved to `--exp_dir`.
 
 ### 📁 Use your own dataset
 
-> **Note.** The **SynthSync** dataset (videos + human annotations) is not yet
-> released — see the [Roadmap](#-roadmap). In the meantime, the training and
-> evaluation code runs on **any custom dataset** that follows the simple layout
-> below. Each *sample* is one underlying video; each *method* is one audio source
-> (a V2A model, or `GT_A` for the real audio) that produced a clip for that video.
+> **The SynthSync dataset is not yet released** (see the [Roadmap](#-roadmap)) —
+> but all training and evaluation code runs on **any custom dataset**.
 
-**Directory layout** (`--data_root`):
+Point `--data_root` at a directory shaped like this:
 
 ```
 my_dataset/
 ├── overall_scores.json                 # {sample: {method: gt_score}}      [required]
-├── valing_pairs.json                   # validation pairs                  [eval + val]
+├── valing_pairs.json                   # eval / validation pairs           [eval + val]
 ├── train.txt                           # sample names, one per line        [RL_rank]
 ├── curriculumn_SFT/level_{0..9}.json   # curriculum pairs — SFT            [SFT only]
 ├── curriculumn_RL/level_{0..9}.json    # curriculum pairs — pairwise RL    [RL only]
 └── <method>/<sample_name>.mp4          # one clip per (method, sample)     [required]
 ```
 
-Every `<method>/<sample_name>.mp4` is a clip with an audio track; the audio is
-read from the video, so no separate `.wav` is needed. Clips are auto padded/
-trimmed to 5 s (60 frames @ 12 FPS, `140×140`) and 80 000 audio samples.
+Each *sample* is one video; each *method* is one audio source (a V2A model, or
+`GT_A` for the real audio). Audio is read from the video track — no separate
+`.wav` needed. The smallest setup (evaluation only) is just `overall_scores.json`,
+`valing_pairs.json`, and the mp4s.
 
-**File formats.**
-
-`overall_scores.json` — the single source of truth for ground-truth scores. Maps
-each sample to a `{method: score}` dict (higher = better synchronized). Scores can
-be any real numbers (win-rates, MOS, human ratings, …); only their *ordering* per
-sample is used.
-
-```json
-{
-  "clip0001": {"mmaudio": 0.42, "foley": 0.19, "GT_A": 1.0},
-  "clip0002": {"mmaudio": 0.16, "foley": 0.55, "GT_A": 1.0}
-}
-```
-
-`valing_pairs.json` — used by `evaluate.py` and training validation. Maps each
-sample to a list of method pairs to compare; a 3rd element (score gap) is optional
-and **ignored by the code** (scores are looked up from `overall_scores.json`).
-Pairs with equal GT scores are skipped.
-
-```json
-{
-  "clip0001": [["mmaudio", "foley"], ["mmaudio", "GT_A"]],
-  "clip0002": [["foley", "GT_A"]]
-}
-```
-
-`train.txt` — plain text, one sample name per line. Used only by `RL_rank`.
-
-```
-clip0001
-clip0002
-```
-
-`curriculumn_SFT/level_{i}.json` and `curriculumn_RL/level_{i}.json` — needed only
-for `SFT` / pairwise `RL`. Ten files per mode (`level_0.json` … `level_9.json`),
-where `level_0` is the hardest bucket (smallest score gap) and `level_9` the
-easiest. Each maps a sample to a list of method pairs; **only the first two
-elements (the two method names) are read** — any trailing values are ignored.
-
-```json
-{
-  "clip0001": [["mmaudio", "foley"], ["foley", "GT_A"]]
-}
-```
-
-> **Minimal setup by mode.** `RL_rank` needs only `overall_scores.json`,
-> `train.txt`, and the per-method mp4s (+ `valing_pairs.json` for validation). SFT
-> and pairwise RL additionally need the matching `curriculumn_*/level_*.json`
-> files. If you only want to **evaluate** an existing checkpoint, you need just
-> `overall_scores.json`, `valing_pairs.json`, and the mp4s.
-
-> **⚠️ Custom method names.** The listwise `AV_RLRankDataset` and the curriculum
-> `AV_Trainset` reference a fixed method list (`ALL_METHODS` in
-> `avsync_eval/training/train_dataset.py`: the 10 V2A models above, plus `GT_A`).
-> If your dataset uses different method names, edit `ALL_METHODS` to match — every
-> name there must appear both as a `<method>/` sub-directory and as a key in
-> `overall_scores.json`. Evaluation (`evaluate.py`) reads method names directly
-> from `valing_pairs.json`, so it works with any names without code changes.
+📖 **Full guide with exact JSON schemas, per-mode file requirements, the
+custom-method-name caveat, and a minimal walk-through:
+[`docs/CUSTOM_DATASET.md`](docs/CUSTOM_DATASET.md).**
 
 ## 📂 Repository Layout
 
