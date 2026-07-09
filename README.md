@@ -1,18 +1,24 @@
 <div align="center">
 
-# AV-Sync Evaluator
+# Beyond Time Shifts: Adapting Omni-LLM as a Reference-Free Evaluator for Generative Audio-Visual Models
 
-**A learned audio-video synchronization scorer built on Qwen2.5-Omni-3B.**
+**A reference-free audio-visual synchronization evaluator built on Qwen2.5-Omni-3B — official code for our ECCV 2026 paper.**
 
-Give it a short video clip and it returns a single scalar — *how well the audio
-and the visuals line up*. Higher is better.
+Give it a single video clip (audio read from the track) and it returns one
+scalar: *how causally consistent the audio and the visuals are*. Higher is
+better. No reference audio required.
 
 <p>
+<img alt="Venue" src="https://img.shields.io/badge/ECCV-2026-1f6feb.svg">
 <img alt="Python" src="https://img.shields.io/badge/python-3.10+-blue.svg">
 <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-2.1+-ee4c2c.svg">
 <img alt="transformers" src="https://img.shields.io/badge/transformers-4.57.1-yellow.svg">
 <img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg">
 </p>
+
+<img src="assets/overview.png" width="95%" alt="Failure cases and pipeline overview">
+
+<sub><b>Top:</b> generative audio-visual outputs exhibit structural hallucinations and asymmetric cross-modal relations that break the "just a time shift" assumption of classic sync metrics. <b>Bottom:</b> our pipeline — the <b>SynthSync</b> dataset of authentic generative failures, a reference-free continuous Omni-LLM scorer, and <b>R-GRPO</b> reinforcement post-training.</sub>
 
 </div>
 
@@ -20,44 +26,66 @@ and the visuals line up*. Higher is better.
 
 ## Overview
 
-The AV-Sync Evaluator is a reference model for judging audio-video
-synchronization in generated (or real) video. It wraps a **Qwen2.5-Omni-3B
-Thinker** with a one-layer linear head (`hidden 2048 → 1`); the sync score is
-read from the last-layer hidden state at the final `SCORE` token.
+Audio-visual generative models (Sora-2, Veo-3, Seedance) are becoming "world
+simulators," but their cross-modal synchronization stays fragile — and, crucially,
+their failures are **not** simple temporal offsets. They involve *structural
+hallucinations* (a glass-shatter sound when a plastic cup hits carpet),
+*asymmetric relations* (a visible action with no corresponding sound), and
+*temporally diffuse* events. Classic sync metrics (onset accuracy, contrastive
+similarity, offset detection) assume structural correctness and therefore fail on
+generated content.
 
-Because a single scalar is hard to supervise directly, the model is trained by
-**ranking** rather than regression: it learns to order competing audio tracks
-for the same video by how well each syncs. The released checkpoint is produced by
-a two-stage recipe — a supervised **cold start (SFT)** followed by **listwise
-reinforcement learning (GRPO)** — both included in this repository.
+This creates a paradox: **humans judge synchronization by relative comparison**
+("which of these two audios fits the video better?"), yet a **deployable metric
+must be reference-free and absolute** (one continuous score for one clip). This
+repository resolves that paradox with a three-part recipe from the paper:
 
-This repo is self-contained: it bundles a local copy of the Qwen2.5-Omni /
-Qwen2-VL model code, so you only need `transformers` for tokenizers/config.
+1. **SynthSync** — the first dataset of *authentic* generative sync failures:
+   10 state-of-the-art V2A models generate competing audios for the *same* video,
+   and expert annotators provide pairwise preferences (≈306K annotations).
+2. **Continuous Omni-LLM evaluator** — a Qwen2.5-Omni-3B whose discrete language
+   head is replaced by a continuous projection head reading the hidden state at a
+   `[SCORE]` token, yielding a single reference-free scalar.
+3. **R-GRPO** (Real-Valued Group Relative Policy Optimization) — reinforcement
+   post-training that treats the scalar output as a Gaussian policy and optimizes
+   the whole *listwise* score distribution against the ground-truth ranking, so
+   the metric internalizes global causal structure rather than local pairwise
+   margins.
+
+The result is a metric with state-of-the-art alignment to human preference, which
+we use to build **SyncBench**, a standardized leaderboard for AV-generation models.
+
+> This repo is self-contained: it bundles a local copy of the Qwen2.5-Omni /
+> Qwen2-VL model code, so only `transformers` is needed for tokenizers/config.
 
 ## Features
 
-- **One-command evaluation** — pairwise ranking accuracy with an easy/medium/hard
-  breakdown, Pearson correlation, and MAE.
-- **Full training pipeline** — SFT, pairwise RL, and listwise RL (RL_rank) in a
-  single Lightning module; multi-GPU via DeepSpeed ZeRO-2.
+- **One-command evaluation** — ranking accuracy (NDCG, Kendall τ, Pair-Acc,
+  Top-1) with an easy/medium/hard breakdown, correlation, and MAE.
+- **Full training pipeline** — Stage I preference SFT (with dynamic curriculum)
+  and Stage II R-GRPO reinforcement post-training in a single Lightning module;
+  multi-GPU via DeepSpeed ZeRO-2.
 - **Single-video demo & batch scorers** — score one clip, or rank whole
-  directories of unlabeled generative-model outputs.
+  directories of unlabeled generative-model outputs (used to build SyncBench).
 - **Reproducible** — the inference path replicates the bf16 training numerics;
-  training/eval share the exact same model + head wiring.
+  training and evaluation share the exact same model + head wiring.
 
 ## Results
 
-Pairwise ranking accuracy on the held-out validation set (11 generation methods,
-GT sync scores):
+On the SynthSync benchmark, R-GRPO sets a new state of the art, outperforming
+off-the-shelf Omni-LLMs, non-LLM metrics, and trained LLM evaluators:
 
-| Split  | Accuracy |
-|--------|:--------:|
-| Overall | **0.72** |
-| Easy   (GT gap > 0.5)        | 0.85 |
-| Medium (0.1 < GT gap ≤ 0.5)  | 0.65 |
-| Hard   (GT gap ≤ 0.1)        | 0.52 |
+| Metric | PFT baseline | **+ R-GRPO (ours)** |
+|--------|:---:|:---:|
+| NDCG            | 0.9353 | **0.9435** |
+| Kendall's τ     | 0.4515 | **0.4899** |
+| MRR             | 0.7316 | **0.7674** |
+| Pairwise Acc (%) | 71.16 | **72.38** |
 
-<sub>Defaults: `fps=12`, frames resized to `140×140` (5 s → 60 frames), audio 80 000 samples, bf16.</sub>
+**Component ablation** (NDCG / Pairwise-Acc): base 0.8531 / 51.02 → +SynthSync
+0.9224 / 66.60 → +preference SFT 0.9353 / 71.16 → **+R-GRPO 0.9435 / 72.38**.
+
+<sub>Defaults: Qwen2.5-Omni-3B, inputs 5 s @ 12 FPS, `140×140`, listwise K=6, 12 Gaussian rollouts (σ²=2.5), AdamW lr 1e-6, PPO clip ε=0.2, KL β=0.001, bf16.</sub>
 
 ## Table of contents
 
@@ -66,10 +94,12 @@ GT sync scores):
 - [Evaluation](#evaluation)
 - [Single-video & batch scoring](#single-video--batch-scoring)
 - [Programmatic use](#programmatic-use)
+- [Method](#method)
 - [Training](#training)
 - [Data layout](#data-layout)
 - [Repository structure](#repository-structure)
 - [Reproducibility notes](#reproducibility-notes)
+- [Citation](#citation)
 
 ## Installation
 
@@ -163,6 +193,57 @@ scores = model.score_batch([video_tensor], [audio_array])   # list[float]
 `video_tensor`: `(frames, 3, H, W)`; `audio_array`: 1-D 16 kHz waveform. Use
 `qwen_omni_utils.process_mm_info(..., use_audio_in_video=True)` to decode an mp4
 into these (see `demo_single_video.py:load_clip`).
+
+## Method
+
+<div align="center">
+<img src="assets/framework.png" width="92%" alt="Framework overview">
+</div>
+
+The evaluator is a Qwen2.5-Omni-3B backbone with its discrete language head
+replaced by a continuous projection MLP. A persistent `[SCORE]` token is appended
+to the multimodal context, and its final hidden state `h_score ∈ ℝ^d` is mapped to
+a scalar `s = MLP(h_score)`, stripping away language-generation stochasticity.
+
+Training aligns this scalar to human preference topology in two stages:
+
+- **Stage I — Latent preference alignment (SFT).** Because ground truth is
+  *relative*, we skip MSE regression and optimize a Bradley-Terry-Luce objective
+  over pairwise preferences `a_i ≻_v a_j`. Fitting all margins through a single
+  shared `f_θ` induces a globally consistent, reference-free value space. A
+  **dynamic curriculum** starts with easy, high-margin pairs (rank-1 vs rank-9)
+  and anneals toward finer comparisons as accuracy improves.
+- **Stage II — R-GRPO.** Pairwise learning suffers *metric myopia*: local margins
+  don't guarantee a globally transitive scale. R-GRPO reparameterizes the
+  deterministic scalar `μ_θ` as a Gaussian policy `N(μ_θ, σ²)`, samples N listwise
+  rollouts per anchor video, and rewards each rollout by how well its full ranking
+  of the K candidates matches the ground-truth topology (a composite of NDCG,
+  Kendall τ, Spearman ρ, Top-1, MRR, pairwise concordance). Group-relative
+  advantages, a closed-form Gaussian importance ratio, PPO clipping, and a KL
+  penalty to the reference policy complete the objective.
+
+<div align="center">
+<img src="assets/rl_curves.png" width="90%" alt="R-GRPO validation learning curves">
+<br><sub>Validation learning curves during R-GRPO post-training.</sub>
+</div>
+
+### SyncBench leaderboard
+
+We deploy the metric to rank six cutting-edge AV-generation models (Sora-2,
+Veo-3.1, WAN-2.6, Vidu-Q3, Grok-3, LTX-2) on 185 diverse prompts. Unlike legacy
+metrics (AV-Align, JavisScore, DeSync) — which show extreme variance and rankings
+that contradict human consensus — our metric cleanly stratifies model quality.
+
+<div align="center">
+<img src="assets/leaderboard.png" width="92%" alt="SyncBench leaderboard">
+</div>
+
+### Qualitative example
+
+<div align="center">
+<img src="assets/qualitative_case.png" width="70%" alt="Qualitative SyncBench example">
+<br><sub>The metric penalizes missing acoustic events, premature/delayed responses, timbre mismatch, and event-count inconsistency — reflecting causal-semantic structure rather than low-level signal similarity.</sub>
+</div>
 
 ## Training
 
@@ -297,3 +378,24 @@ opensource_eval/
   (80 000 samples) must match training — these are the defaults everywhere.
 - Training and inference share the same model, head, and forward, so a checkpoint
   trained with `train.py` evaluates identically through `evaluate.py`.
+
+## Citation
+
+If you find this work useful, please cite our paper:
+
+```bibtex
+@inproceedings{qian2026beyond,
+  title     = {Beyond Time Shifts: Adapting Omni-LLM as a Reference-Free
+               Evaluator for Generative Audio-Visual Models},
+  author    = {Qian, Yijie and Wang, Juncheng and Xu, Chao and Wang, Huihan and
+               Feng, Yuxiang and Liu, Yang and Sun, Baigui and Liu, Yong and
+               Wang, Shujun},
+  booktitle = {European Conference on Computer Vision (ECCV)},
+  year      = {2026}
+}
+```
+
+## License
+
+Released under the [MIT License](LICENSE). The Qwen2.5-Omni base weights are
+subject to their own license from the model provider.
