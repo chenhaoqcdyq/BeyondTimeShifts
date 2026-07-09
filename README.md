@@ -1,30 +1,40 @@
 <div align="center">
 
-# Beyond Time Shifts: Adapting Omni-LLM as a Reference-Free Evaluator for Generative Audio-Visual Models
+<h1>AV-Sync Evaluator</h1>
 
-**A reference-free audio-visual synchronization evaluator built on Qwen2.5-Omni-3B — official code for our ECCV 2026 paper.**
+<p><strong>🎬 Beyond Time Shifts: A Reference-Free Evaluator for Generative Audio-Visual Models</strong></p>
 
-Give it a single video clip (audio read from the track) and it returns one
-scalar: *how causally consistent the audio and the visuals are*. Higher is
-better. No reference audio required.
+<p>A reference-free audio-visual synchronization metric built on Qwen2.5-Omni-3B. Give it a single video clip — audio read from the track — and it returns one scalar: how causally consistent the audio and the visuals are. Higher is better, no reference audio required. Official code for our ECCV 2026 paper, with the full training recipe (preference SFT + R-GRPO) and inference stack in one repository.</p>
 
 <p>
-<img alt="Venue" src="https://img.shields.io/badge/ECCV-2026-1f6feb.svg">
-<img alt="Python" src="https://img.shields.io/badge/python-3.10+-blue.svg">
-<img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-2.1+-ee4c2c.svg">
-<img alt="transformers" src="https://img.shields.io/badge/transformers-4.57.1-yellow.svg">
-<img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg">
+  <a href="#-quick-start"><b>🚀 Quick Start</b></a> |
+  <a href="#-method"><b>🧠 Method</b></a> |
+  <a href="#-evaluation"><b>📊 Evaluation</b></a> |
+  <a href="#-training"><b>🔧 Training</b></a> |
+  <a href="#-citation"><b>📝 Citation</b></a>
 </p>
 
-<img src="assets/overview.png" width="95%" alt="Failure cases and pipeline overview">
+<p>
+  <img src="https://img.shields.io/badge/ECCV-2026-1f6feb?style=flat-square" alt="ECCV 2026">
+  <img src="https://img.shields.io/badge/Backbone-Qwen2.5--Omni--3B-blue?style=flat-square" alt="Qwen2.5-Omni-3B">
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.10+">
+  <img src="https://img.shields.io/badge/PyTorch-2.1+-ee4c2c?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch 2.1+">
+  <img src="https://img.shields.io/badge/transformers-4.57.1-yellow?style=flat-square&logo=huggingface&logoColor=white" alt="transformers 4.57.1">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT">
+</p>
 
-<sub><b>Top:</b> generative audio-visual outputs exhibit structural hallucinations and asymmetric cross-modal relations that break the "just a time shift" assumption of classic sync metrics. <b>Bottom:</b> our pipeline — the <b>SynthSync</b> dataset of authentic generative failures, a reference-free continuous Omni-LLM scorer, and <b>R-GRPO</b> reinforcement post-training.</sub>
+<img src="assets/overview.png" width="100%" alt="Failure cases and pipeline overview">
+
+<p><sub><b>Top:</b> generative audio-visual outputs exhibit structural hallucinations and asymmetric cross-modal relations that break the "just a time shift" assumption of classic sync metrics. <b>Bottom:</b> our pipeline — the <b>SynthSync</b> dataset of authentic generative failures, a reference-free continuous Omni-LLM scorer, and <b>R-GRPO</b> reinforcement post-training.</sub></p>
 
 </div>
 
----
+## 🔥 News
 
-## Overview
+- **[2026-07]** 🎉 Full open-source release — inference/evaluation package and the complete two-stage training pipeline (preference SFT + R-GRPO).
+- **[2026-07]** 📄 Our paper is accepted to **ECCV 2026**.
+
+## ✨ Introduction
 
 Audio-visual generative models (Sora-2, Veo-3, Seedance) are becoming "world
 simulators," but their cross-modal synchronization stays fragile — and, crucially,
@@ -58,19 +68,17 @@ we use to build **SyncBench**, a standardized leaderboard for AV-generation mode
 > This repo is self-contained: it bundles a local copy of the Qwen2.5-Omni /
 > Qwen2-VL model code, so only `transformers` is needed for tokenizers/config.
 
-## Features
+### 🌟 Key Features
 
-- **One-command evaluation** — ranking accuracy (NDCG, Kendall τ, Pair-Acc,
-  Top-1) with an easy/medium/hard breakdown, correlation, and MAE.
-- **Full training pipeline** — Stage I preference SFT (with dynamic curriculum)
-  and Stage II R-GRPO reinforcement post-training in a single Lightning module;
-  multi-GPU via DeepSpeed ZeRO-2.
-- **Single-video demo & batch scorers** — score one clip, or rank whole
-  directories of unlabeled generative-model outputs (used to build SyncBench).
-- **Reproducible** — the inference path replicates the bf16 training numerics;
-  training and evaluation share the exact same model + head wiring.
+|     | Feature | Description |
+| --- | ------- | ----------- |
+| 🎯 | **Reference-free scoring** | One continuous causal-synchronization score for a single `(video, audio)` clip — no reference audio needed. |
+| 🧠 | **Continuous Omni-LLM** | Qwen2.5-Omni-3B with a `[SCORE]`-token projection head, trained by ranking rather than regression. |
+| 🔧 | **Full training recipe** | Preference SFT (dynamic curriculum) + R-GRPO reinforcement post-training in one Lightning module; multi-GPU via DeepSpeed ZeRO-2. |
+| 📊 | **Batteries-included eval** | Ranking accuracy (NDCG, Kendall τ, Pair-Acc, Top-1), easy/medium/hard breakdown, correlation, MAE — plus batch scorers for whole model outputs. |
+| 🔁 | **Reproducible** | Inference replicates bf16 training numerics; training and evaluation share the exact same model + head wiring. |
 
-## Results
+## 📊 Results
 
 On the SynthSync benchmark, R-GRPO sets a new state of the art, outperforming
 off-the-shelf Omni-LLMs, non-LLM metrics, and trained LLM evaluators:
@@ -87,37 +95,12 @@ off-the-shelf Omni-LLMs, non-LLM metrics, and trained LLM evaluators:
 
 <sub>Defaults: Qwen2.5-Omni-3B, inputs 5 s @ 12 FPS, `140×140`, listwise K=6, 12 Gaussian rollouts (σ²=2.5), AdamW lr 1e-6, PPO clip ε=0.2, KL β=0.001, bf16.</sub>
 
-## Table of contents
-
-- [Installation](#installation)
-- [Quick start](#quick-start)
-- [Evaluation](#evaluation)
-- [Single-video & batch scoring](#single-video--batch-scoring)
-- [Programmatic use](#programmatic-use)
-- [Method](#method)
-- [Training](#training)
-- [Data layout](#data-layout)
-- [Repository structure](#repository-structure)
-- [Reproducibility notes](#reproducibility-notes)
-- [Citation](#citation)
-
-## Installation
+## 🚀 Quick Start
 
 ```bash
-# Inference / evaluation
+# Install (inference / evaluation)
 pip install -r requirements.txt
 
-# + Training (adds lightning, deepspeed, scipy, tensorboard)
-pip install -r requirements_train.txt
-```
-
-Key versions: `transformers==4.57.1`, `qwen-omni-utils==0.0.8`. The base weights
-`Qwen/Qwen2.5-Omni-3B` download automatically from the Hugging Face Hub on first
-run.
-
-## Quick start
-
-```bash
 # 1. Convert the trained DeepSpeed checkpoint into a single clean .pt (once)
 python convert_checkpoint.py \
     --ckpt_dir /path/to/best-epoch081-acc0.7323.ckpt \
@@ -130,6 +113,11 @@ python demo_single_video.py \
 # -> Sync score for /path/to/clip.mp4: 3.14
 ```
 
+Key versions: `transformers==4.57.1`, `qwen-omni-utils==0.0.8`. The base weights
+`Qwen/Qwen2.5-Omni-3B` download automatically from the Hugging Face Hub on first
+run. For training, also `pip install -r requirements_train.txt` (adds lightning,
+deepspeed, scipy, tensorboard).
+
 ### Convert the checkpoint
 
 The trained checkpoint is a DeepSpeed ZeRO directory. `convert_checkpoint.py`
@@ -137,67 +125,10 @@ reads only `checkpoint/mp_rank_00_model_states.pt`, keeps the `transformer.*` an
 `regression_head.*` tensors, and drops the optimizer shards and the training-time
 reference model — so `zero_to_fp32.py` is **not** required.
 
-## Evaluation
-
-```bash
-python evaluate.py \
-    --weights   ./avsync_eval_weights.pt \
-    --data_root /path/to/Crop_5s_resize \
-    --batch_size 3
-```
-
-Reports overall pairwise ranking accuracy, the easy/medium/hard breakdown (by
-GT-score gap), Pearson correlation, and MAE, and writes per-sample predictions to
-`eval_results.json`. Useful flags:
-
-| Flag | Default | Notes |
-|------|---------|-------|
-| `--precision_mode` | `bf16` | `bf16-mixed` replicates the training autocast path |
-| `--attn_implementation` | `sdpa` | `flash_attention_2` matches the training kernel |
-| `--batch_size` | `3` | lower to `1` if memory-constrained |
-
-## Single-video & batch scoring
-
-```bash
-# One clip
-python demo_single_video.py --weights ./avsync_eval_weights.pt --video clip.mp4
-
-# A directory of generative-model outputs (no GT labels): per-clip scores +
-# per-model mean/median, for ranking models against each other.
-python score_videogen.py \
-    --weights ./avsync_eval_weights.pt \
-    --root    /path/to/VideoGen/outputs \
-    --out     ./videogen_scores.json
-
-# LTX nested layout ( <sample_id>/video_*.mp4 )
-python score_ltx.py \
-    --weights ./avsync_eval_weights.pt \
-    --root    /path/to/LTX \
-    --out     ./ltx_scores.json
-```
-
-## Programmatic use
-
-```python
-import torch
-from avsync_eval.models.evaluator import AVSyncEvaluator
-
-model = AVSyncEvaluator(model_name="Qwen/Qwen2.5-Omni-3B", v_fps=12, v_size=140)
-ckpt = torch.load("avsync_eval_weights.pt", map_location="cpu")
-model.load_eval_checkpoint(ckpt["state_dict"])
-model.to_eval_device()                          # -> cuda, bf16, eval()
-
-scores = model.score_batch([video_tensor], [audio_array])   # list[float]
-```
-
-`video_tensor`: `(frames, 3, H, W)`; `audio_array`: 1-D 16 kHz waveform. Use
-`qwen_omni_utils.process_mm_info(..., use_audio_in_video=True)` to decode an mp4
-into these (see `demo_single_video.py:load_clip`).
-
-## Method
+## 🧠 Method
 
 <div align="center">
-<img src="assets/framework.png" width="92%" alt="Framework overview">
+<img src="assets/framework.png" width="95%" alt="Framework overview">
 </div>
 
 The evaluator is a Qwen2.5-Omni-3B backbone with its discrete language head
@@ -223,11 +154,11 @@ Training aligns this scalar to human preference topology in two stages:
   penalty to the reference policy complete the objective.
 
 <div align="center">
-<img src="assets/rl_curves.png" width="90%" alt="R-GRPO validation learning curves">
+<img src="assets/rl_curves.png" width="95%" alt="R-GRPO validation learning curves">
 <br><sub>Validation learning curves during R-GRPO post-training.</sub>
 </div>
 
-### SyncBench leaderboard
+### 🏆 SyncBench leaderboard
 
 We deploy the metric to rank six cutting-edge AV-generation models (Sora-2,
 Veo-3.1, WAN-2.6, Vidu-Q3, Grok-3, LTX-2) on 185 diverse prompts. Unlike legacy
@@ -235,17 +166,74 @@ metrics (AV-Align, JavisScore, DeSync) — which show extreme variance and ranki
 that contradict human consensus — our metric cleanly stratifies model quality.
 
 <div align="center">
-<img src="assets/leaderboard.png" width="92%" alt="SyncBench leaderboard">
+<img src="assets/leaderboard.png" width="95%" alt="SyncBench leaderboard">
 </div>
 
-### Qualitative example
+### 🔍 Qualitative example
 
 <div align="center">
-<img src="assets/qualitative_case.png" width="70%" alt="Qualitative SyncBench example">
+<img src="assets/qualitative_case.png" width="72%" alt="Qualitative SyncBench example">
 <br><sub>The metric penalizes missing acoustic events, premature/delayed responses, timbre mismatch, and event-count inconsistency — reflecting causal-semantic structure rather than low-level signal similarity.</sub>
 </div>
 
-## Training
+## 📊 Evaluation
+
+```bash
+python evaluate.py \
+    --weights   ./avsync_eval_weights.pt \
+    --data_root /path/to/Crop_5s_resize \
+    --batch_size 3
+```
+
+Reports overall pairwise ranking accuracy, the easy/medium/hard breakdown (by
+GT-score gap), Pearson correlation, and MAE, and writes per-sample predictions to
+`eval_results.json`. Useful flags:
+
+| Flag | Default | Notes |
+|------|---------|-------|
+| `--precision_mode` | `bf16` | `bf16-mixed` replicates the training autocast path |
+| `--attn_implementation` | `sdpa` | `flash_attention_2` matches the training kernel |
+| `--batch_size` | `3` | lower to `1` if memory-constrained |
+
+### Single-video & batch scoring
+
+```bash
+# One clip
+python demo_single_video.py --weights ./avsync_eval_weights.pt --video clip.mp4
+
+# A directory of generative-model outputs (no GT labels): per-clip scores +
+# per-model mean/median, for ranking models against each other.
+python score_videogen.py \
+    --weights ./avsync_eval_weights.pt \
+    --root    /path/to/VideoGen/outputs \
+    --out     ./videogen_scores.json
+
+# LTX nested layout ( <sample_id>/video_*.mp4 )
+python score_ltx.py \
+    --weights ./avsync_eval_weights.pt \
+    --root    /path/to/LTX \
+    --out     ./ltx_scores.json
+```
+
+### Programmatic use
+
+```python
+import torch
+from avsync_eval.models.evaluator import AVSyncEvaluator
+
+model = AVSyncEvaluator(model_name="Qwen/Qwen2.5-Omni-3B", v_fps=12, v_size=140)
+ckpt = torch.load("avsync_eval_weights.pt", map_location="cpu")
+model.load_eval_checkpoint(ckpt["state_dict"])
+model.to_eval_device()                          # -> cuda, bf16, eval()
+
+scores = model.score_batch([video_tensor], [audio_array])   # list[float]
+```
+
+`video_tensor`: `(frames, 3, H, W)`; `audio_array`: 1-D 16 kHz waveform. Use
+`qwen_omni_utils.process_mm_info(..., use_audio_in_video=True)` to decode an mp4
+into these (see `demo_single_video.py:load_clip`).
+
+## 🔧 Training
 
 The released checkpoint comes from a two-stage recipe: **SFT cold start → listwise
 RL**. Both stages use the same entry point, `train.py`, selected by
@@ -318,7 +306,7 @@ the best checkpoint by that metric is saved to `--exp_dir`.
 > **VRAM guide (RL_rank, batch_size=1):** ~4–5 methods @ 24 GB · ~6–8 @ 40 GB ·
 > 11 @ 80 GB.
 
-## Data layout
+### Data layout
 
 The dataset files and videos are **not** bundled — point `--data_root` at your own
 copy following this layout:
@@ -342,18 +330,19 @@ Crop_5s_resize/
   of difficulty level *i* (level 0 = hardest / smallest GT gap). Needed for SFT /
   pairwise RL only.
 
-## Repository structure
+## 📂 Repository Layout
 
-```
+```text
 opensource_eval/
-├── convert_checkpoint.py        # DeepSpeed ZeRO ckpt  ->  single clean .pt
-├── evaluate.py                  # batch eval on a dataset -> pairwise accuracy
+├── convert_checkpoint.py       # DeepSpeed ZeRO ckpt  ->  single clean .pt
+├── evaluate.py                 # batch eval on a dataset -> pairwise accuracy
 ├── demo_single_video.py        # score one mp4
 ├── score_videogen.py           # batch-score a flat dir of clips (no GT)
 ├── score_ltx.py                # batch-score the LTX nested layout (no GT)
 ├── train.py                    # training entry point (SFT / RL / RL_rank)
 ├── requirements.txt            # inference deps
 ├── requirements_train.txt      # + training deps
+├── assets/                     # README figures
 └── avsync_eval/
     ├── models/
     │   ├── evaluator.py         # AVSyncEvaluator = Thinker + linear score head
@@ -369,7 +358,7 @@ opensource_eval/
     └── qwen2_vl/                # bundled Qwen2-VL implementation
 ```
 
-## Reproducibility notes
+## 🔁 Reproducibility
 
 - The checkpoint was trained with DeepSpeed **bf16**; `to_eval_device()` casts to
   bf16 to reproduce the online training scores. For the closest match to the
@@ -379,7 +368,7 @@ opensource_eval/
 - Training and inference share the same model, head, and forward, so a checkpoint
   trained with `train.py` evaluates identically through `evaluate.py`.
 
-## Citation
+## 📝 Citation
 
 If you find this work useful, please cite our paper:
 
@@ -395,7 +384,13 @@ If you find this work useful, please cite our paper:
 }
 ```
 
-## License
+## 🙏 Acknowledgments
+
+- Built on [Qwen2.5-Omni](https://github.com/QwenLM/Qwen2.5-Omni) as the multimodal backbone.
+- Training uses [PyTorch Lightning](https://github.com/Lightning-AI/pytorch-lightning) and [DeepSpeed](https://github.com/deepspeedai/DeepSpeed).
+- R-GRPO adapts the [GRPO](https://github.com/deepseek-ai/DeepSeek-R1) framework to continuous latent policies.
+
+## 📄 License
 
 Released under the [MIT License](LICENSE). The Qwen2.5-Omni base weights are
 subject to their own license from the model provider.
