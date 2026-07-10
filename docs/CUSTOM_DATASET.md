@@ -1,7 +1,7 @@
 # Using Your Own Dataset
 
 Our **SynthSync** dataset (videos + human annotations) is available at
-[🤗 qianyijie/leaderboard](https://huggingface.co/qianyijie/leaderboard). You can
+[🤗 qianyijie/SyncBench](https://huggingface.co/datasets/qianyijie/SyncBench). You can
 also run all training and evaluation code on **any custom dataset** that follows
 the layout below.
 
