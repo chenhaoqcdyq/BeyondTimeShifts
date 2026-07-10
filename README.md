@@ -19,7 +19,7 @@
 <p>
   <a href="https://arxiv.org/abs/XXXX.XXXXX"><img src="https://img.shields.io/badge/arXiv-XXXX.XXXXX-b31b1b?style=flat-square&logo=arxiv&logoColor=white" alt="arXiv"></a>
   <a href="https://huggingface.co/qianyijie/avsync-evaluator"><img src="https://img.shields.io/badge/🤗%20Model-avsync--evaluator-yellow?style=flat-square" alt="HF Model"></a>
-  <a href="https://huggingface.co/datasets/qianyijie/SyncBench"><img src="https://img.shields.io/badge/🤗%20Dataset-SynthSync-yellow?style=flat-square" alt="HF Dataset"></a>
+  <a href="https://huggingface.co/datasets/qianyijie/SyncBench"><img src="https://img.shields.io/badge/🤗%20Dataset-SyncBench-yellow?style=flat-square" alt="HF Dataset"></a>
   <img src="https://img.shields.io/badge/ECCV-2026-1f6feb?style=flat-square" alt="ECCV 2026">
   <img src="https://img.shields.io/badge/Backbone-Qwen2.5--Omni--3B-blue?style=flat-square" alt="Qwen2.5-Omni-3B">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT">
@@ -33,7 +33,7 @@
 
 - **[2026-07]** 🎉 Code released — inference/evaluation + full two-stage training pipeline.
 - **[2026-07]** 🤗 Trained checkpoint released: [qianyijie/avsync-evaluator](https://huggingface.co/qianyijie/avsync-evaluator).
-- **[2026-07]** 📦 SynthSync benchmark released: [🤗 qianyijie/SyncBench](https://huggingface.co/datasets/qianyijie/SyncBench). You can also run on your [own dataset](#-use-your-own-dataset).
+- **[2026-07]** 📦 SyncBench released: [🤗 qianyijie/SyncBench](https://huggingface.co/datasets/qianyijie/SyncBench). You can also run on your [own dataset](#-use-your-own-dataset).
 - **[2026-06]** 📄 Paper accepted to **ECCV 2026**.
 
 ## ✨ Introduction
