@@ -140,11 +140,13 @@ writes predictions to `eval_results.json`.
 ### Batch scoring (no labels)
 
 ```bash
-# Flat directory of clips: per-clip scores + per-model mean/median
+# Flat layout: one sub-dir per model, each holding clips directly
 python tools/score_videogen.py --weights ./avsync_eval_weights.pt --root /path/to/outputs --out ./scores.json
 
-# LTX nested layout ( <sample_id>/video_*.mp4 )
-python tools/score_ltx.py --weights ./avsync_eval_weights.pt --root /path/to/LTX --out ./ltx_scores.json
+# Nested layout: one sub-dir per sample with several candidates (e.g. LTX);
+# each sample is reduced to one representative score (--nested_reduce)
+python tools/score_videogen.py --weights ./avsync_eval_weights.pt --root /path/to/LTX \
+    --layout nested --model_label LTX --out ./ltx_scores.json
 ```
 
 ### Programmatic use
@@ -222,8 +224,7 @@ opensource_eval/
 ├── requirements*.txt           # inference / + training deps
 ├── tools/
 │   ├── convert_checkpoint.py   # DeepSpeed ZeRO ckpt -> single .pt
-│   ├── score_videogen.py       # batch-score a flat dir (no GT)
-│   └── score_ltx.py            # batch-score LTX nested layout (no GT)
+│   └── score_videogen.py       # batch-score outputs (flat + nested, no GT)
 └── avsync_eval/
     ├── models/                 # evaluator.py, hacked_qwen.py
     ├── data/dataset.py         # AV_ValDataset

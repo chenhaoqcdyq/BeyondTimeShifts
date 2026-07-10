@@ -156,7 +156,8 @@ my_dataset/
 python evaluate.py --weights ./avsync_eval_weights.pt --data_root ./my_dataset
 ```
 
-For unlabeled clips (no `overall_scores.json`), use the batch scorers instead —
-`tools/score_videogen.py` (flat directory) or `tools/score_ltx.py` (nested layout)
-— which emit per-clip scores and per-model aggregates. See the
-[main README](../README.md#single-video--batch-scoring).
+For unlabeled clips (no `overall_scores.json`), use the batch scorer instead —
+`tools/score_videogen.py`, which supports a flat per-model layout (`--layout flat`)
+or a nested per-sample layout with multiple candidates (`--layout nested`) — and
+emits per-clip scores and per-model aggregates. See the
+[main README](../README.md#batch-scoring-no-labels).
