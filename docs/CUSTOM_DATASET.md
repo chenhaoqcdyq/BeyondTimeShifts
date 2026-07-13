@@ -1,9 +1,7 @@
 # Using Your Own Dataset
 
-Our **SynthSync** dataset (videos + human annotations) is available at
-[🤗 qianyijie/SyncBench](https://huggingface.co/datasets/qianyijie/SyncBench). You can
-also run all training and evaluation code on **any custom dataset** that follows
-the layout below.
+All training and evaluation code runs on **any custom dataset** that follows the
+layout below.
 
 **Terminology.** Each *sample* is one underlying video. Each *method* is one audio
 source — a video-to-audio (V2A) model, or `GT_A` for the real recorded audio —

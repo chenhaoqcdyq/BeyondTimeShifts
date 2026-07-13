@@ -195,7 +195,7 @@ python train.py --train_mode RL_rank --data_root /path/to/data \
 
 ### 📁 Use your own dataset
 
-> Prefer our data? Grab **SynthSync** from [🤗 qianyijie/SyncBench](https://huggingface.co/datasets/qianyijie/SyncBench). Otherwise, the code runs on **any custom dataset** in the layout below.
+> The training and evaluation code runs on **any custom dataset** that follows the layout below.
 
 ```
 my_dataset/
@@ -247,8 +247,7 @@ evaluate identically through `evaluate.py`.
 - [x] Full training pipeline (preference SFT + R-GRPO)
 - [x] Batch scorers for unlabeled outputs
 - [x] **Trained checkpoint** — [🤗 qianyijie/avsync-evaluator](https://huggingface.co/qianyijie/avsync-evaluator)
-- [x] **SynthSync dataset** — [🤗 qianyijie/SyncBench](https://huggingface.co/datasets/qianyijie/SyncBench)
-- [ ] **SyncBench** prompts & samples
+- [x] **SyncBench benchmark** — [🤗 qianyijie/SyncBench](https://huggingface.co/datasets/qianyijie/SyncBench)
 
 ## 📝 Citation
 
