@@ -248,6 +248,7 @@ evaluate identically through `evaluate.py`.
 - [x] Batch scorers for unlabeled outputs
 - [x] **Trained checkpoint** — [🤗 qianyijie/avsync-evaluator](https://huggingface.co/qianyijie/avsync-evaluator)
 - [x] **SyncBench benchmark** — [🤗 qianyijie/SyncBench](https://huggingface.co/datasets/qianyijie/SyncBench)
+- [ ] **SynthSync training set** — V2A clips + pairwise human annotations *(to be released)*
 
 ## 📝 Citation
 
