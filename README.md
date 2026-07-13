@@ -17,7 +17,7 @@
 </p>
 
 <p>
-  <a href="https://arxiv.org/abs/XXXX.XXXXX"><img src="https://img.shields.io/badge/arXiv-XXXX.XXXXX-b31b1b?style=flat-square&logo=arxiv&logoColor=white" alt="arXiv"></a>
+  <a href="https://arxiv.org/abs/2607.09091"><img src="https://img.shields.io/badge/arXiv-2607.09091-b31b1b?style=flat-square&logo=arxiv&logoColor=white" alt="arXiv"></a>
   <a href="https://huggingface.co/qianyijie/avsync-evaluator"><img src="https://img.shields.io/badge/🤗%20Model-avsync--evaluator-yellow?style=flat-square" alt="HF Model"></a>
   <a href="https://huggingface.co/datasets/qianyijie/SyncBench"><img src="https://img.shields.io/badge/🤗%20Dataset-SyncBench-yellow?style=flat-square" alt="HF Dataset"></a>
   <img src="https://img.shields.io/badge/ECCV-2026-1f6feb?style=flat-square" alt="ECCV 2026">
@@ -261,7 +261,7 @@ evaluate identically through `evaluate.py`.
                Wang, Shujun},
   booktitle = {European Conference on Computer Vision (ECCV)},
   year      = {2026},
-  eprint    = {XXXX.XXXXX},
+  eprint    = {2607.09091},
   archivePrefix = {arXiv}
 }
 ```
